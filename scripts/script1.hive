@@ -1,0 +1,8 @@
+set hive.groupby.orderby.position.alias=true;
+set hive.exec.drop.ignorenonexistent=true;
+CREATE DATABASE IF NOT EXISTS ${database_name};
+use ${database_name};
+DROP TABLE IF EXISTS ${database_name}.${table_name};
+create table IF NOT EXISTS ${database_name}.${table_name}(id int,
+age int)ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' 
+;

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow-app xmlns="uri:oozie:workflow:0.5" name="fork-join-sample-wf">
+	<start to="hive-fork_node" />
+	
+	<fork name="hive-fork_node">
+		<path start="create_table1" />
+		<path start="create_table2" />
+	</fork>
+	
+	<action name="create_table1">
+		<hive2 xmlns="uri:oozie:hive2-action:0.1">
+			<job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+            </prepare>
+            <configuration>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+            </configuration>
+            <jdbc-url>${jdbcURL}</jdbc-url>
+            <script>${rootDir}/scripts/script1.hive</script>
+				<param>database_name=${database_name}</param>
+            	<param>table_name=${table_name}</param>
+				<param>record_separtor=${record_separtor}</param>
+		</hive2>
+		<ok to="join_node"/>
+        <error to="fail"/>
+	</action>
+	
+	<action name="create_table2">
+        <hive2 xmlns="uri:oozie:hive2-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+            </prepare>
+            <configuration>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+            </configuration>
+            <jdbc-url>${jdbcURL}</jdbc-url>
+            <script>${rootDir}/scripts/script2.hive</script>
+				<param>database_name=${database_name}</param>
+            	<param>table_name=${table_name}</param>
+				<param>FILE_PATH=${FILE_PATH}</param>           
+        </hive2>
+        <ok to="join_node"/>
+        <error to="fail"/>
+    </action>
+	
+	<join name="join_node" to="end" />
+	
+	<kill name="fail">
+        	<message>Hive2 (Beeline) action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+	<end name="end" />
+	
+</workflow-app>

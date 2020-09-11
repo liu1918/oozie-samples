@@ -1,0 +1,27 @@
+<workflow-app name="sample-wf" xmlns="uri:oozie:workflow:0.3">
+	<start to='load' />
+	<action name="load">
+		<hive xmlns="uri:oozie:hive-action:0.2">
+			<job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+            </prepare>
+            <configuration>
+                <property>
+					<name>hive.metastore.uris</name>
+					<value>thrift://192.168.240.138:9083</value>
+				</property>
+            </configuration>
+			<script>${rootDir}/scripts/load.sql</script>
+				<param>database_name=${database_name}</param>
+            	<param>table_name=${table_name}</param>
+				<param>FILE_PATH=${FILE_PATH}</param>  
+		</hive>
+		<ok to="end" />
+		<error to="fail"/>
+	</action>
+	<kill name="fail">
+		<message>Script failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+	<end name="end" />
+</workflow-app>
